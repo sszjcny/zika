@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "short_name": "我的应用",
+  "name": "字卡抽取模式",
+  "short_name": "华清宫",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
