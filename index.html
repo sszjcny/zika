@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>字卡抽取模式</title>
 
-    <!-- 应用名称：华清宫 -->
     <meta name="application-name" content="华清宫">
     <meta name="apple-mobile-web-app-title" content="华清宫">
     <meta name="theme-color" content="#667eea">
@@ -14,11 +13,9 @@
     <link rel="apple-touch-icon"
           href="https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg">
 
-    <!-- 用 data: URL 内联 manifest -->
     <script>
     (function () {
         var ICON = 'https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg';
-
         var pageUrl = location.href.split('#')[0].split('?')[0];
         var scope = pageUrl.substring(0, pageUrl.lastIndexOf('/') + 1);
 
@@ -201,25 +198,28 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        function getRandomResponse() {
-            const count = Math.floor(Math.random() * 4) + 1;
-            const shuffled = [...wordBank].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, count).join('、');
-        }
-
         function sendMessage() {
             const message = userInput.value.trim();
             if (message === '') return;
+
             addMessage(message, true);
             userInput.value = '';
+
+            // 随机等待 10–40 秒后再开始回复
+            const delay = Math.floor(Math.random() * 30000) + 10000; // 10000–40000ms
+
             setTimeout(() => {
-                const count = Math.floor(Math.random() * 4) + 1;
+                const count = Math.floor(Math.random() * 4) + 1; // 1–4 条
                 const shuffled = [...wordBank].sort(() => 0.5 - Math.random());
                 const selected = shuffled.slice(0, count);
+
+                // 逐条显示，每条间隔 700ms
                 selected.forEach((word, index) => {
-                    setTimeout(() => addMessage(word, false), index * 700);
+                    setTimeout(() => {
+                        addMessage(word, false);
+                    }, index * 700);
                 });
-            }, 500);
+            }, delay);
         }
 
         chatForm.addEventListener('submit', function (e) {
