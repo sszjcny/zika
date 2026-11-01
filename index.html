@@ -130,20 +130,37 @@
             border-top: 1px solid #e0e0e0;
             flex-shrink: 0;
         }
-        .chat-input-form { display: flex; gap: 10px; }
         
-        /* 修改了 input 的属性以屏蔽自动填充 */
+        /* 将 form 改为 div 布局 */
+        .chat-input-box { display: flex; gap: 10px; align-items: flex-end; }
+        
+        /* 终极防弹出：使用 div 模拟 input */
         #userInput {
             flex: 1;
             padding: 12px 16px;
             border: 2px solid #e0e0e0;
             border-radius: 25px;
-            font-size: 16px; /* 16px 防止 iOS 聚焦缩放 */
+            font-size: 16px; 
             outline: none;
             transition: border-color 0.3s;
             background-color: transparent;
+            max-height: 100px; 
+            overflow-y: auto;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            color: #333;
         }
         #userInput:focus { border-color: #667eea; }
+        
+        /* 用 CSS 模拟 placeholder 效果 */
+        #userInput:empty::before {
+            content: attr(data-placeholder);
+            color: #999;
+            pointer-events: none;
+            display: block;
+        }
+
         #sendButton {
             padding: 12px 24px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -154,9 +171,11 @@
             font-size: 14px;
             font-weight: bold;
             transition: transform 0.2s;
+            margin-bottom: 2px; /* 对齐 */
         }
         #sendButton:hover  { transform: scale(1.05); }
         #sendButton:active { transform: scale(0.95); }
+        
         .chat-messages::-webkit-scrollbar { width: 6px; }
         .chat-messages::-webkit-scrollbar-thumb {
             background: #667eea;
@@ -173,23 +192,17 @@
             </div>
         </div>
         <div class="chat-input-container">
-            <form class="chat-input-form" id="chatForm">
-                <!-- 这里加了 autocomplete="new-password" 等属性，强制阻止浏览器弹出自动填充 -->
-                <input type="text" id="userInput" placeholder="输入消息..." 
-                       autocomplete="new-password" 
-                       autocorrect="off" 
-                       autocapitalize="off" 
-                       spellcheck="false"
-                       aria-autocomplete="none"
-                       required>
-                <button type="submit" id="sendButton">发送</button>
-            </form>
+            <!-- 不用 form 包裹，直接用普通 div -->
+            <div class="chat-input-box">
+                <!-- 把 input 换成 contenteditable="true" 的 div -->
+                <div id="userInput" contenteditable="true" data-placeholder="输入消息..."></div>
+                <button type="button" id="sendButton">发送</button>
+            </div>
         </div>
     </div>
     <script>
         // ---------- 禁止下拉刷新 ----------
         let startY = 0;
-
         document.addEventListener('touchstart', function (e) {
             if (e.touches.length === 1) startY = e.touches[0].clientY;
         }, { passive: true });
@@ -231,8 +244,8 @@
             '我好', '不知道', '知道', '那你去找ta吧', '（闹）', ''
         ];
         const chatMessages = document.getElementById('chatMessages');
-        const chatForm = document.getElementById('chatForm');
         const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
 
         function addMessage(text, isUser) {
             const messageDiv = document.createElement('div');
@@ -246,11 +259,14 @@
         }
 
         function sendMessage() {
-            const message = userInput.value.trim();
+            // 获取 div 中的纯文本
+            const message = userInput.innerText.trim();
             if (message === '') return;
 
             addMessage(message, true);
-            userInput.value = '';
+            
+            // 清空可编辑 div
+            userInput.innerHTML = '';
 
             // 10–20 秒随机延迟
             const delay = Math.floor(Math.random() * 10000) + 10000;
@@ -268,17 +284,17 @@
             }, delay);
         }
 
-        chatForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            sendMessage();
-        });
+        // 监听回车键（处理 div 的回车换行问题）
         userInput.addEventListener('keydown', function (e) {
+            // 如果按下 Enter 且没有按 Shift，则发送
             if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
+                e.preventDefault(); // 阻止 div 默认的换行行为
                 sendMessage();
             }
         });
-        document.getElementById('sendButton').addEventListener('click', function (e) {
+
+        // 点击发送按钮
+        sendButton.addEventListener('click', function (e) {
             e.preventDefault();
             sendMessage();
         });
