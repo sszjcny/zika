@@ -1,6 +1,6 @@
 {
   "name": "字卡抽取模式 · 智能聊天助手",
-  "short_name": "字卡抽取",
+  "short_name": "华清宫",
   "description": "从词库中随机抽取字卡回复的聊天小工具，支持自定义输入与逐条抽取。",
   "lang": "zh-CN",
   "dir": "ltr",
@@ -15,27 +15,15 @@
   "categories": ["entertainment", "social", "lifestyle"],
   "icons": [
     {
-      "src": "./icon-192.png",
+      "src": "https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "./icon-512.png",
+      "src": "https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "./icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "any"
     }
   ],
@@ -44,7 +32,13 @@
       "name": "打开聊天",
       "short_name": "聊天",
       "url": "./index.html",
-      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg",
+          "sizes": "192x192",
+          "type": "image/jpeg"
+        }
+      ]
     }
   ]
 }
