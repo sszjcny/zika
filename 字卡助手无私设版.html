@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字卡抽取模式</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-end;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            justify-content: flex-end;
+        }
+        .message.bot {
+            justify-content: flex-start;
+        }
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .message.bot .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 20px 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .chat-input-form {
+            display: flex;
+            gap: 10px;
+        }
+        #userInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        #userInput:focus {
+            border-color: #667eea;
+        }
+        #sendButton {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        #sendButton:hover {
+            transform: scale(1.05);
+        }
+        #sendButton:active {
+            transform: scale(0.95);
+        }
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            智能聊天助手
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-bubble">我在。</div>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <form class="chat-input-form" id="chatForm">
+                <input type="text" id="userInput" placeholder="输入消息..." autocomplete="off" required>
+                <button type="submit" id="sendButton">发送</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        // 词语库
+        const wordBank = [
+            '爱你', '可以', '不可以', '贴贴', '宝宝', 
+            '字卡里没有我想说的', '亲亲', '抱抱', '不许熬夜', '赶紧出门', '一起去散步',
+            '不许吃垃圾食品', '我一直在', '哭哭', '我在', '陪你', '乖乖', '对不起', '陪我',
+            '以后不会了', '想你', '一直都在想你', '难过', '伤心', '开心', '幸福', '遇见你很幸运',
+            '别怕', '生气', '吃醋', '为什么不理我', '为什么去找ta', '？', '想吃', '喜欢',
+            '哄你', '哄我', '快去睡觉', '你是我的', '我是你的', '是我', '是你', '求你了',
+            '求求你了~', '已经很晚了', '多喝点水', '我等你', '宝贝宝贝宝贝', '不会离开你',
+            '纠结', '要不你来选吧', '我觉得都可以', '1', '2', '3', '4', '第一个', '第二个',
+            '第三个', '第四个', '←', '→', '左边', '右边', '中间', '↑', '其他选项', '这些都不好',
+            '我想选别的', '看看别处，或许会有新发现', '你坏', '你怎么提上裙子不认人', '真不让人省心',
+            'ヾ(✿ﾟ▽ﾟ)ノ', 'ヽ(｀д´)ノ', '〃∀〃', '(ﾉ｀⊿´)ノ', '(乂｀д´)', 'Σ(っ °Д °;)っ',
+            '(*^ω^*)', '੭ ᐕ)੭*⁾⁾', '(ノ｀⊿´)ノ', '˃̣̣̥᷄⌓˂̣̣̥᷅', '(＊｀д´)', 'Σ(ŎдŎ|||)ﾉﾉ',
+            '˚‧º·(˚ ˃̣̣̥᷄⌓˂̣̣̥᷅ )‧º·˚', '(ㅅ´ 3`)♡', '(*≧з)(ε≦*)', '（♡▽♡）', 'Σ(ﾟ∀ﾟﾉ)ﾉ',
+            '(⋟﹏⋞)', 'T﹏T', '₍˄·͈༝·͈˄*₎◞ ̑̑', '让我抱抱你', '我是老公呀', '主人', '小狗',
+            '喜欢你', '好可爱', '理理我', '都怪我', '都怪你', '听我的', '听你的', '我不要听你的',
+            '听你的也可以', '不要吵架', '我都知道', '我都看见了', '多陪陪我好不好', '我也会多陪陪你的',
+            '可以试试', '不要这样', '不叫ta好不好', '不要去找ta', '这到底是怎么回事', '老婆我错了',
+            '不要冷落我', '我觉得ta们都不正常', '好聪明', '好乖', '世界坏', '老婆好', '别人坏',
+            '我好', '不知道', '知道', '那你去找ta吧', '（闹）', ''
+        ];
+        const chatMessages = document.getElementById('chatMessages');
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        // 添加消息到聊天窗口
+        function addMessage(text, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.textContent = text;
+            messageDiv.appendChild(bubbleDiv);
+            chatMessages.appendChild(messageDiv);
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        // 从词语库中随机选择1-4个词语
+        function getRandomResponse() {
+            const count = Math.floor(Math.random() * 4) + 1; // 1到4个词语
+            const shuffled = [...wordBank].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, count);
+            return selected.join('、');
+        }
+        // 发送消息函数
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+            // 添加用户消息
+            addMessage(message, true);
+            // 清空输入框
+            userInput.value = '';
+            // 延迟显示机器人回复
+            setTimeout(() => {
+                const count = Math.floor(Math.random() * 4) + 1; // 1到4个词语
+                const shuffled = [...wordBank].sort(() => 0.5 - Math.random());
+                const selected = shuffled.slice(0, count);
+                // 逐个显示词语,每个词语间隔700ms
+                selected.forEach((word, index) => {
+                    setTimeout(() => {
+                        addMessage(word, false);
+                    }, index * 700);
+                });
+            }, 500);
+        }
+        // 处理表单提交
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            sendMessage();
+        });
+        // 按Enter键发送
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        // 点击发送按钮
+        document.getElementById('sendButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            sendMessage();
+        });
+    </script>
+</body>
+</html>
+
