@@ -50,11 +50,11 @@
 
         html, body {
             height: 100%;
-            overflow: hidden;              /* 禁止页面整体滚动 */
-            overscroll-behavior-y: none;   /* 禁止下拉刷新/滚动链 */
+            overflow: hidden;
+            overscroll-behavior-y: none;
             overscroll-behavior: none;
-            touch-action: manipulation;    /* 减少双击缩放干扰 */
-            position: fixed;               /* 固定页面，防 iOS 橡皮筋 */
+            touch-action: manipulation;
+            position: fixed;
             width: 100%;
             top: 0; left: 0;
         }
@@ -91,7 +91,7 @@
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: contain; /* 消息区滚动不传给页面 */
+            overscroll-behavior-y: contain;
             padding: 20px;
             background: #f5f5f5;
         }
@@ -131,6 +131,8 @@
             flex-shrink: 0;
         }
         .chat-input-form { display: flex; gap: 10px; }
+        
+        /* 修改了 input 的属性以屏蔽自动填充 */
         #userInput {
             flex: 1;
             padding: 12px 16px;
@@ -139,6 +141,7 @@
             font-size: 16px; /* 16px 防止 iOS 聚焦缩放 */
             outline: none;
             transition: border-color 0.3s;
+            background-color: transparent;
         }
         #userInput:focus { border-color: #667eea; }
         #sendButton {
@@ -171,7 +174,14 @@
         </div>
         <div class="chat-input-container">
             <form class="chat-input-form" id="chatForm">
-                <input type="text" id="userInput" placeholder="输入消息..." autocomplete="off" required>
+                <!-- 这里加了 autocomplete="new-password" 等属性，强制阻止浏览器弹出自动填充 -->
+                <input type="text" id="userInput" placeholder="输入消息..." 
+                       autocomplete="new-password" 
+                       autocorrect="off" 
+                       autocapitalize="off" 
+                       spellcheck="false"
+                       aria-autocomplete="none"
+                       required>
                 <button type="submit" id="sendButton">发送</button>
             </form>
         </div>
@@ -188,16 +198,12 @@
             if (e.touches.length !== 1) return;
             const currentY = e.touches[0].clientY;
             const dy = currentY - startY;
-
-            // 在页面顶部继续下拉 → 阻止默认（防刷新/橡皮筋）
-            const atTop = window.scrollY <= 0 &&
-                          chatMessages.scrollTop <= 0;
+            const atTop = window.scrollY <= 0 && chatMessages.scrollTop <= 0;
             if (atTop && dy > 0) {
                 e.preventDefault();
             }
         }, { passive: false });
 
-        // 部分安卓浏览器还需阻止 body 的滚动链
         document.body.addEventListener('touchmove', function (e) {
             if (e.target === document.body) e.preventDefault();
         }, { passive: false });
