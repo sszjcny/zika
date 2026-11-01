@@ -1,20 +1,50 @@
 {
-  "name": "字卡抽取模式",
-  "short_name": "华清宫",
-  "description": "字卡抽取聊天助手，随机回复词语库中的内容",
-  "start_url": "./",
+  "name": "字卡抽取模式 · 智能聊天助手",
+  "short_name": "字卡抽取",
+  "description": "从词库中随机抽取字卡回复的聊天小工具，支持自定义输入与逐条抽取。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "id": "/",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "orientation": "portrait",
   "background_color": "#667eea",
   "theme_color": "#667eea",
-  "lang": "zh-CN",
+  "categories": ["entertainment", "social", "lifestyle"],
   "icons": [
     {
-      "src": "https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg",
-      "sizes": "any",
-      "type": "image/jpeg",
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "打开聊天",
+      "short_name": "聊天",
+      "url": "./index.html",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
