@@ -4,11 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>字卡抽取模式</title>
-    <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#667eea">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="字卡抽取">
-<link rel="apple-touch-icon" href="./icon-192.png">
+
+    <!-- PWA 相关 meta -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="字卡抽取">
+    <link rel="apple-touch-icon"
+          href="https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg">
+
+    <!-- 动态生成并注入 manifest，无需单独的 manifest.json -->
+    <script>
+    (function () {
+        var ICON = 'https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg';
+
+        // 用绝对地址，避免 blob manifest 的相对路径解析问题
+        var pageUrl = location.href.split('#')[0].split('?')[0];
+        var scope = pageUrl.substring(0, pageUrl.lastIndexOf('/') + 1);
+
+        var manifest = {
+            name: '字卡抽取模式 · 智能聊天助手',
+            short_name: '字卡抽取',
+            description: '从词库中随机抽取字卡回复的聊天小工具，支持自定义输入与逐条抽取。',
+            lang: 'zh-CN',
+            start_url: pageUrl,
+            scope: scope,
+            display: 'standalone',
+            orientation: 'portrait',
+            background_color: '#667eea',
+            theme_color: '#667eea',
+            categories: ['entertainment', 'social', 'lifestyle'],
+            icons: [
+                { src: ICON, sizes: '192x192', type: 'image/jpeg', purpose: 'any' },
+                { src: ICON, sizes: '512x512', type: 'image/jpeg', purpose: 'any' },
+                { src: ICON, sizes: '512x512', type: 'image/jpeg', purpose: 'maskable' }
+            ]
+        };
+
+        var blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        var link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = URL.createObjectURL(blob);
+        document.head.appendChild(link);
+    })();
+    </script>
+
     <style>
         * {
             margin: 0;
@@ -149,7 +189,7 @@
     <script>
         // 词语库
         const wordBank = [
-            '爱你', '可以', '不可以', '贴贴', '宝宝', 
+            '爱你', '可以', '不可以', '贴贴', '宝宝',
             '字卡里没有我想说的', '亲亲', '抱抱', '不许熬夜', '赶紧出门', '一起去散步',
             '不许吃垃圾食品', '我一直在', '哭哭', '我在', '陪你', '乖乖', '对不起', '陪我',
             '以后不会了', '想你', '一直都在想你', '难过', '伤心', '开心', '幸福', '遇见你很幸运',
@@ -232,4 +272,3 @@
     </script>
 </body>
 </html>
-
