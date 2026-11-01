@@ -5,27 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>字卡抽取模式</title>
 
-    <!-- PWA 相关 meta -->
+    <!-- 应用名称：华清宫 -->
+    <meta name="application-name" content="华清宫">
+    <meta name="apple-mobile-web-app-title" content="华清宫">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="字卡抽取">
     <link rel="apple-touch-icon"
           href="https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg">
 
-    <!-- 动态生成并注入 manifest，无需单独的 manifest.json -->
+    <!-- 用 data: URL 内联 manifest -->
     <script>
     (function () {
         var ICON = 'https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg';
 
-        // 用绝对地址，避免 blob manifest 的相对路径解析问题
         var pageUrl = location.href.split('#')[0].split('?')[0];
         var scope = pageUrl.substring(0, pageUrl.lastIndexOf('/') + 1);
 
         var manifest = {
-            name: '字卡抽取模式 · 智能聊天助手',
-            short_name: '字卡抽取',
-            description: '从词库中随机抽取字卡回复的聊天小工具，支持自定义输入与逐条抽取。',
+            name: '华清宫',
+            short_name: '华清宫',
+            description: '字卡抽取聊天小工具',
             lang: 'zh-CN',
             start_url: pageUrl,
             scope: scope,
@@ -33,7 +33,6 @@
             orientation: 'portrait',
             background_color: '#667eea',
             theme_color: '#667eea',
-            categories: ['entertainment', 'social', 'lifestyle'],
             icons: [
                 { src: ICON, sizes: '192x192', type: 'image/jpeg', purpose: 'any' },
                 { src: ICON, sizes: '512x512', type: 'image/jpeg', purpose: 'any' },
@@ -41,20 +40,16 @@
             ]
         };
 
-        var blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
         var link = document.createElement('link');
         link.rel = 'manifest';
-        link.href = URL.createObjectURL(blob);
+        link.href = 'data:application/manifest+json,' +
+                    encodeURIComponent(JSON.stringify(manifest));
         document.head.appendChild(link);
     })();
     </script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -98,12 +93,8 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .message.user {
-            justify-content: flex-end;
-        }
-        .message.bot {
-            justify-content: flex-start;
-        }
+        .message.user { justify-content: flex-end; }
+        .message.bot  { justify-content: flex-start; }
         .message-bubble {
             max-width: 70%;
             padding: 12px 16px;
@@ -127,10 +118,7 @@
             border-radius: 0 0 20px 20px;
             border-top: 1px solid #e0e0e0;
         }
-        .chat-input-form {
-            display: flex;
-            gap: 10px;
-        }
+        .chat-input-form { display: flex; gap: 10px; }
         #userInput {
             flex: 1;
             padding: 12px 16px;
@@ -140,9 +128,7 @@
             outline: none;
             transition: border-color 0.3s;
         }
-        #userInput:focus {
-            border-color: #667eea;
-        }
+        #userInput:focus { border-color: #667eea; }
         #sendButton {
             padding: 12px 24px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -154,15 +140,9 @@
             font-weight: bold;
             transition: transform 0.2s;
         }
-        #sendButton:hover {
-            transform: scale(1.05);
-        }
-        #sendButton:active {
-            transform: scale(0.95);
-        }
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
+        #sendButton:hover  { transform: scale(1.05); }
+        #sendButton:active { transform: scale(0.95); }
+        .chat-messages::-webkit-scrollbar { width: 6px; }
         .chat-messages::-webkit-scrollbar-thumb {
             background: #667eea;
             border-radius: 3px;
@@ -171,9 +151,7 @@
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">
-            智能聊天助手
-        </div>
+        <div class="chat-header">智能聊天助手</div>
         <div class="chat-messages" id="chatMessages">
             <div class="message bot">
                 <div class="message-bubble">我在。</div>
@@ -187,7 +165,6 @@
         </div>
     </div>
     <script>
-        // 词语库
         const wordBank = [
             '爱你', '可以', '不可以', '贴贴', '宝宝',
             '字卡里没有我想说的', '亲亲', '抱抱', '不许熬夜', '赶紧出门', '一起去散步',
@@ -212,7 +189,7 @@
         const chatMessages = document.getElementById('chatMessages');
         const chatForm = document.getElementById('chatForm');
         const userInput = document.getElementById('userInput');
-        // 添加消息到聊天窗口
+
         function addMessage(text, isUser) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
@@ -221,51 +198,41 @@
             bubbleDiv.textContent = text;
             messageDiv.appendChild(bubbleDiv);
             chatMessages.appendChild(messageDiv);
-            // 滚动到底部
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-        // 从词语库中随机选择1-4个词语
+
         function getRandomResponse() {
-            const count = Math.floor(Math.random() * 4) + 1; // 1到4个词语
+            const count = Math.floor(Math.random() * 4) + 1;
             const shuffled = [...wordBank].sort(() => 0.5 - Math.random());
-            const selected = shuffled.slice(0, count);
-            return selected.join('、');
+            return shuffled.slice(0, count).join('、');
         }
-        // 发送消息函数
+
         function sendMessage() {
             const message = userInput.value.trim();
             if (message === '') return;
-            // 添加用户消息
             addMessage(message, true);
-            // 清空输入框
             userInput.value = '';
-            // 延迟显示机器人回复
             setTimeout(() => {
-                const count = Math.floor(Math.random() * 4) + 1; // 1到4个词语
+                const count = Math.floor(Math.random() * 4) + 1;
                 const shuffled = [...wordBank].sort(() => 0.5 - Math.random());
                 const selected = shuffled.slice(0, count);
-                // 逐个显示词语,每个词语间隔700ms
                 selected.forEach((word, index) => {
-                    setTimeout(() => {
-                        addMessage(word, false);
-                    }, index * 700);
+                    setTimeout(() => addMessage(word, false), index * 700);
                 });
             }, 500);
         }
-        // 处理表单提交
-        chatForm.addEventListener('submit', function(e) {
+
+        chatForm.addEventListener('submit', function (e) {
             e.preventDefault();
             sendMessage();
         });
-        // 按Enter键发送
-        userInput.addEventListener('keydown', function(e) {
+        userInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
             }
         });
-        // 点击发送按钮
-        document.getElementById('sendButton').addEventListener('click', function(e) {
+        document.getElementById('sendButton').addEventListener('click', function (e) {
             e.preventDefault();
             sendMessage();
         });
