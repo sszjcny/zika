@@ -1,0 +1,17 @@
+{
+  "name": "",
+  "short_name": "我的应用",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://img13.360buyimg.com/ddimg/jfs/t1/558116/21/6025/8108/6ae77fb4F0e8e3d19/001543743772df88.jpg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
