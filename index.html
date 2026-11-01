@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>字卡抽取模式</title>
 
     <meta name="application-name" content="华清宫">
@@ -47,14 +47,26 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;              /* 禁止页面整体滚动 */
+            overscroll-behavior-y: none;   /* 禁止下拉刷新/滚动链 */
+            overscroll-behavior: none;
+            touch-action: manipulation;    /* 减少双击缩放干扰 */
+            position: fixed;               /* 固定页面，防 iOS 橡皮筋 */
+            width: 100%;
+            top: 0; left: 0;
+        }
+
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
+
         .chat-container {
             width: 90%;
             max-width: 600px;
@@ -64,19 +76,22 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         .chat-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
-            border-radius: 20px 20px 0 0;
             text-align: center;
             font-size: 20px;
             font-weight: bold;
+            flex-shrink: 0;
         }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain; /* 消息区滚动不传给页面 */
             padding: 20px;
             background: #f5f5f5;
         }
@@ -112,8 +127,8 @@
         .chat-input-container {
             padding: 20px;
             background: white;
-            border-radius: 0 0 20px 20px;
             border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
         }
         .chat-input-form { display: flex; gap: 10px; }
         #userInput {
@@ -121,7 +136,7 @@
             padding: 12px 16px;
             border: 2px solid #e0e0e0;
             border-radius: 25px;
-            font-size: 14px;
+            font-size: 16px; /* 16px 防止 iOS 聚焦缩放 */
             outline: none;
             transition: border-color 0.3s;
         }
@@ -162,6 +177,32 @@
         </div>
     </div>
     <script>
+        // ---------- 禁止下拉刷新 ----------
+        let startY = 0;
+
+        document.addEventListener('touchstart', function (e) {
+            if (e.touches.length === 1) startY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function (e) {
+            if (e.touches.length !== 1) return;
+            const currentY = e.touches[0].clientY;
+            const dy = currentY - startY;
+
+            // 在页面顶部继续下拉 → 阻止默认（防刷新/橡皮筋）
+            const atTop = window.scrollY <= 0 &&
+                          chatMessages.scrollTop <= 0;
+            if (atTop && dy > 0) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // 部分安卓浏览器还需阻止 body 的滚动链
+        document.body.addEventListener('touchmove', function (e) {
+            if (e.target === document.body) e.preventDefault();
+        }, { passive: false });
+
+        // ---------- 聊天逻辑 ----------
         const wordBank = [
             '爱你', '可以', '不可以', '贴贴', '宝宝',
             '字卡里没有我想说的', '亲亲', '抱抱', '不许熬夜', '赶紧出门', '一起去散步',
@@ -205,15 +246,14 @@
             addMessage(message, true);
             userInput.value = '';
 
-            // 随机等待 10–40 秒后再开始回复
-            const delay = Math.floor(Math.random() * 30000) + 10000; // 10000–40000ms
+            // 10–20 秒随机延迟
+            const delay = Math.floor(Math.random() * 10000) + 10000;
 
             setTimeout(() => {
-                const count = Math.floor(Math.random() * 4) + 1; // 1–4 条
+                const count = Math.floor(Math.random() * 4) + 1;
                 const shuffled = [...wordBank].sort(() => 0.5 - Math.random());
                 const selected = shuffled.slice(0, count);
 
-                // 逐条显示，每条间隔 700ms
                 selected.forEach((word, index) => {
                     setTimeout(() => {
                         addMessage(word, false);
